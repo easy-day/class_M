@@ -11,7 +11,7 @@ https://docs.djangoproject.com/en/3.0/ref/settings/
 """
 
 import os
-
+from datetime import timedelta
 # Build paths inside the project like this: os.path.join(BASE_DIR, ...)
 BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 
@@ -33,11 +33,12 @@ ALLOWED_HOSTS = []
 INSTALLED_APPS = [
     'django.contrib.admin',
     'django.contrib.auth',
-    'test123.apps.Test123Config',
     'django.contrib.contenttypes',
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
+    'rest_framework',
+    'test123',
 ]
 
 MIDDLEWARE = [
@@ -105,6 +106,72 @@ AUTH_PASSWORD_VALIDATORS = [
     },
 ]
 
+# User 모델을 AbstractUser 모델로 사용했기 때문에 에러 발생을 막기위해
+AUTH_USER_MODEL = 'test123.User'
+
+# DRF 설정
+# DEFAULT_PAGINATION_CLASS: DRF에서 제공해주는 pagination을 사용하기 위한 설정입니다.
+# PAGE_SIZE: pagination을 몇개씩 보여줄 지 설정입니다.
+# DEFAULT_PERMISSION_CLASSES: 기본 permisstions을 어떻게 줄 것인지 설정입니다.
+# DEFAULT_AUTHENTICATION_CLASSES: Authenticationt설정입니다.(해당 프로젝트에서는 기본적으로 IsAuthenticated 설정을 하였습니다.)
+# DEFAULT_RENDERER_CLASSES: api 결과를 어떤 형태로 전달하는가에 대한 설정입니다. (해당 설정을 해주지 않으면 web형태로 나오게 됩니다. 개인적인 의견으로 json형태가 프론트가 편하게 받을 수 있다고 생각합니다.)
+# DEFAULT_PARSER_CLASSES: 요청받을 때 body 형태에 대한 설정입니다. postman에서 여러 테스트를 해보기 위해 설정하였습니다.
+REST_FRAMEWORK = {
+    'DEFAULT_PAGINATION_CLASS': 'rest_framework.pagination.PageNumberPagination',
+    'PAGE_SIZE': 10,
+    'DEFAULT_PERMISSION_CLASSES': (
+        'rest_framework.permissions.IsAuthenticated',
+    ),
+    'DEFAULT_AUTHENTICATION_CLASSES': [
+        'rest_framework_jwt.authentication.JSONWebTokenAuthentication',
+        'rest_framework.authentication.SessionAuthentication',
+        'rest_framework.authentication.BasicAuthentication',
+    ],
+    'DEFAULT_RENDERER_CLASSES': [
+        'rest_framework.renderers.JSONRenderer',
+    ],
+    'DEFAULT_PARSER_CLASSES': [
+        'rest_framework.parsers.JSONParser',
+        'rest_framework.parsers.FormParser',
+        'rest_framework.parsers.MultiPartParser'
+    ]
+}
+
+#REST jwt 설정
+JWT_AUTH = {
+    'JWT_ENCODE_HANDLER':
+        'rest_framework_jwt.utils.jwt_encode_handler',
+
+    'JWT_DECODE_HANDLER':
+        'rest_framework_jwt.utils.jwt_decode_handler',
+
+    'JWT_PAYLOAD_HANDLER':
+        'rest_framework_jwt.utils.jwt_payload_handler',
+
+    'JWT_PAYLOAD_GET_USER_ID_HANDLER':
+        'rest_framework_jwt.utils.jwt_get_user_id_from_payload_handler',
+
+    'JWT_RESPONSE_PAYLOAD_HANDLER':
+        'rest_framework_jwt.utils.jwt_response_payload_handler',
+
+    'JWT_SECRET_KEY': 'SECRET_KEY',
+    'JWT_GET_USER_SECRET_KEY': None,
+    'JWT_PUBLIC_KEY': None,
+    'JWT_PRIVATE_KEY': None,
+    'JWT_ALGORITHM': 'HS256',
+    'JWT_VERIFY': True,
+    'JWT_VERIFY_EXPIRATION': True,
+    'JWT_LEEWAY': 0,
+    'JWT_EXPIRATION_DELTA': timedelta(days=30),
+    'JWT_AUDIENCE': None,
+    'JWT_ISSUER': None,
+
+    'JWT_ALLOW_REFRESH': False,
+    'JWT_REFRESH_EXPIRATION_DELTA': timedelta(days=30),
+
+    'JWT_AUTH_HEADER_PREFIX': 'Bearer',
+    'JWT_AUTH_COOKIE': None,
+}
 
 # Internationalization
 # https://docs.djangoproject.com/en/3.0/topics/i18n/
